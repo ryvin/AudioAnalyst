@@ -1,0 +1,6 @@
+openai_whisper==20231117
+#torch==2.4.0+cu124
+nltk==3.6.5
+anthropic==0.3.11
+python-dotenv==0.19.1
+numpy==1.23.5

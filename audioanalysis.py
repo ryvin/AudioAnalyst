@@ -24,30 +24,27 @@ nltk.download('stopwords', quiet=True)
 logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s')
 
 def transcribe_audio(audio_file, model_name="base", language=None):
-    """
-    Transcribes the given audio file using the specified Whisper model.
-    
-    Parameters:
-        audio_file (str): Path to the audio file to transcribe.
-        model_name (str): Model variant to use for transcription.
-        language (str, optional): Language of the audio for targeted transcription.
-
-    Returns:
-        str: The transcribed text or None if transcription fails.
-    """
     try:
         logging.info(f"Loading Whisper model: {model_name}")
         model = whisper.load_model(model_name)
         
         logging.info(f"Transcribing {audio_file}...")
-        device = "cuda" if torch.cuda.is_available() else "cpu"
-        logging.info(f"Using device: {device}")
+        logging.info(f"File exists: {os.path.exists(audio_file)}")
+        logging.info(f"File size: {os.path.getsize(audio_file)} bytes")
         
-        result = model.transcribe(audio_file, language=language, fp16=torch.cuda.is_available(), device=device)
+        logging.info("Using CPU for transcription")
+        
+        # Force CPU usage
+        with torch.no_grad():
+            if language:
+                result = model.transcribe(audio_file, language=language, fp16=False)
+            else:
+                result = model.transcribe(audio_file, fp16=False)
+        
         logging.info("Transcription complete!")
         return result["text"]
     except Exception as e:
-        logging.error("Error during transcription", exc_info=True)
+        logging.error(f"Error during transcription: {str(e)}", exc_info=True)
         return None
 
 def verify_cuda():
